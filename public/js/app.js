@@ -163,6 +163,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _css_custom_css__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../../css/custom.css */ "./resources/css/custom.css");
 function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) arr2[i] = arr[i]; return arr2; }
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -172,7 +178,12 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
-      products: {}
+      products: {},
+      selectedVariant: "",
+      selectedProduct: "",
+      priceFrom: "",
+      priceTo: "",
+      selectedDate: ""
     };
   },
   filters: {
@@ -201,13 +212,21 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         });
         response.data.data = test;
         _this.products = response.data;
-        console.log(_this.products);
+        var myVar = response.data.data.map(function (element) {
+          return element.product_variants.map(function (items) {
+            return items.variant;
+          });
+        });
+        _this.variants = _toConsumableArray(new Set(myVar.flat()));
       })["catch"](function (error) {
         return console.log(error);
       });
     },
     toggle: function toggle(index) {
       this.products.data[index].active = !this.products.data[index].active;
+    },
+    search: function search() {
+      console.log(this.selectedDate);
     }
   }
 });
@@ -517,7 +536,158 @@ var render = function render() {
     _c = _vm._self._c;
   return _c("div", {
     staticClass: "card"
-  }, [_vm._m(0), _vm._v(" "), _c("div", {
+  }, [_c("form", {
+    staticClass: "card-header",
+    attrs: {
+      action: ""
+    }
+  }, [_c("div", {
+    staticClass: "form-row justify-content-between"
+  }, [_c("div", {
+    staticClass: "col-md-2"
+  }, [_c("input", {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.selectedProduct,
+      expression: "selectedProduct"
+    }],
+    staticClass: "form-control",
+    attrs: {
+      type: "text",
+      name: "title",
+      placeholder: "Product Title"
+    },
+    domProps: {
+      value: _vm.selectedProduct
+    },
+    on: {
+      input: function input($event) {
+        if ($event.target.composing) return;
+        _vm.selectedProduct = $event.target.value;
+      }
+    }
+  })]), _vm._v(" "), _c("div", {
+    staticClass: "col-md-2"
+  }, [_c("select", {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.selectedVariant,
+      expression: "selectedVariant"
+    }],
+    staticClass: "form-control",
+    attrs: {
+      name: "variant",
+      id: ""
+    },
+    on: {
+      change: function change($event) {
+        var $$selectedVal = Array.prototype.filter.call($event.target.options, function (o) {
+          return o.selected;
+        }).map(function (o) {
+          var val = "_value" in o ? o._value : o.value;
+          return val;
+        });
+        _vm.selectedVariant = $event.target.multiple ? $$selectedVal : $$selectedVal[0];
+      }
+    }
+  }, _vm._l(_vm.variants, function (varies) {
+    return _c("option", {
+      domProps: {
+        value: varies
+      }
+    }, [_vm._v(_vm._s(varies))]);
+  }), 0)]), _vm._v(" "), _c("div", {
+    staticClass: "col-md-3"
+  }, [_c("div", {
+    staticClass: "input-group"
+  }, [_vm._m(0), _vm._v(" "), _c("input", {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.priceFrom,
+      expression: "priceFrom"
+    }],
+    staticClass: "form-control",
+    attrs: {
+      type: "text",
+      name: "price_from",
+      "aria-label": "First name",
+      placeholder: "From"
+    },
+    domProps: {
+      value: _vm.priceFrom
+    },
+    on: {
+      input: function input($event) {
+        if ($event.target.composing) return;
+        _vm.priceFrom = $event.target.value;
+      }
+    }
+  }), _vm._v(" "), _c("input", {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.priceTo,
+      expression: "priceTo"
+    }],
+    staticClass: "form-control",
+    attrs: {
+      type: "text",
+      name: "price_to",
+      "aria-label": "Last name",
+      placeholder: "To"
+    },
+    domProps: {
+      value: _vm.priceTo
+    },
+    on: {
+      input: function input($event) {
+        if ($event.target.composing) return;
+        _vm.priceTo = $event.target.value;
+      }
+    }
+  })])]), _vm._v(" "), _c("div", {
+    staticClass: "col-md-2"
+  }, [_c("input", {
+    directives: [{
+      name: "model",
+      rawName: "v-model",
+      value: _vm.selectedDate,
+      expression: "selectedDate"
+    }],
+    staticClass: "form-control",
+    attrs: {
+      type: "date",
+      name: "date",
+      placeholder: "Date"
+    },
+    domProps: {
+      value: _vm.selectedDate
+    },
+    on: {
+      input: function input($event) {
+        if ($event.target.composing) return;
+        _vm.selectedDate = $event.target.value;
+      }
+    }
+  })]), _vm._v(" "), _c("div", {
+    staticClass: "col-md-1"
+  }, [_c("button", {
+    staticClass: "btn btn-primary float-right",
+    attrs: {
+      type: "submit"
+    },
+    on: {
+      click: function click($event) {
+        $event.preventDefault();
+        return _vm.search.apply(null, arguments);
+      }
+    }
+  }, [_c("i", {
+    staticClass: "fa fa-search"
+  })])])])]), _vm._v(" "), _c("div", {
     staticClass: "card-body"
   }, [_c("div", {
     staticClass: "table-response"
@@ -590,78 +760,11 @@ var render = function render() {
 var staticRenderFns = [function () {
   var _vm = this,
     _c = _vm._self._c;
-  return _c("form", {
-    staticClass: "card-header",
-    attrs: {
-      action: "",
-      method: "get"
-    }
-  }, [_c("div", {
-    staticClass: "form-row justify-content-between"
-  }, [_c("div", {
-    staticClass: "col-md-2"
-  }, [_c("input", {
-    staticClass: "form-control",
-    attrs: {
-      type: "text",
-      name: "title",
-      placeholder: "Product Title"
-    }
-  })]), _vm._v(" "), _c("div", {
-    staticClass: "col-md-2"
-  }, [_c("select", {
-    staticClass: "form-control",
-    attrs: {
-      name: "variant",
-      id: ""
-    }
-  }, [_c("option", {
-    attrs: {
-      value: ""
-    }
-  }, [_vm._v("test")])])]), _vm._v(" "), _c("div", {
-    staticClass: "col-md-3"
-  }, [_c("div", {
-    staticClass: "input-group"
-  }, [_c("div", {
+  return _c("div", {
     staticClass: "input-group-prepend"
   }, [_c("span", {
     staticClass: "input-group-text"
-  }, [_vm._v("Price Range")])]), _vm._v(" "), _c("input", {
-    staticClass: "form-control",
-    attrs: {
-      type: "text",
-      name: "price_from",
-      "aria-label": "First name",
-      placeholder: "From"
-    }
-  }), _vm._v(" "), _c("input", {
-    staticClass: "form-control",
-    attrs: {
-      type: "text",
-      name: "price_to",
-      "aria-label": "Last name",
-      placeholder: "To"
-    }
-  })])]), _vm._v(" "), _c("div", {
-    staticClass: "col-md-2"
-  }, [_c("input", {
-    staticClass: "form-control",
-    attrs: {
-      type: "date",
-      name: "date",
-      placeholder: "Date"
-    }
-  })]), _vm._v(" "), _c("div", {
-    staticClass: "col-md-1"
-  }, [_c("button", {
-    staticClass: "btn btn-primary float-right",
-    attrs: {
-      type: "submit"
-    }
-  }, [_c("i", {
-    staticClass: "fa fa-search"
-  })])])])]);
+  }, [_vm._v("Price Range")])]);
 }, function () {
   var _vm = this,
     _c = _vm._self._c;

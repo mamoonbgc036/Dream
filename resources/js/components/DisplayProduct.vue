@@ -1,13 +1,13 @@
 <template>
     <div class="card">
-    <form action="" method="get" class="card-header">
+    <form action="" class="card-header">
         <div class="form-row justify-content-between">
             <div class="col-md-2">
-                <input type="text" name="title" placeholder="Product Title" class="form-control">
+                <input type="text" name="title" v-model="selectedProduct" placeholder="Product Title" class="form-control">
             </div>
             <div class="col-md-2">
-                <select name="variant" id="" class="form-control">
-                    <option value="">test</option>
+                <select name="variant" id="" class="form-control" v-model="selectedVariant">
+                    <option v-for="varies in variants" :value="varies">{{ varies }}</option>
                 </select>
             </div>
 
@@ -16,16 +16,16 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text">Price Range</span>
                     </div>
-                    <input type="text" name="price_from" aria-label="First name" placeholder="From"
+                    <input type="text" v-model="priceFrom" name="price_from" aria-label="First name" placeholder="From"
                         class="form-control">
-                    <input type="text" name="price_to" aria-label="Last name" placeholder="To" class="form-control">
+                    <input type="text" v-model="priceTo" name="price_to" aria-label="Last name" placeholder="To" class="form-control">
                 </div>
             </div>
             <div class="col-md-2">
-                <input type="date" name="date" placeholder="Date" class="form-control">
+                <input type="date" name="date" v-model="selectedDate" placeholder="Date" class="form-control">
             </div>
             <div class="col-md-1">
-                <button type="submit" class="btn btn-primary float-right"><i class="fa fa-search"></i></button>
+                <button type="submit" class="btn btn-primary float-right" @click.prevent="search"><i class="fa fa-search"></i></button>
             </div>
         </div>
     </form>
@@ -98,6 +98,11 @@ export default {
   data() {
     return {
       products:{},
+      selectedVariant:"",
+      selectedProduct:"",
+      priceFrom:"",
+      priceTo:"",
+      selectedDate:"",
     };
   },
   filters: {
@@ -121,13 +126,21 @@ export default {
 
             response.data.data = test;
             this.products = response.data;
-            console.log(this.products);
+            const myVar = response.data.data.map(element=>{
+                 return element.product_variants.map(items=>{
+                    return items.variant
+                 })
+            })
+            this.variants = [...new Set(myVar.flat())];
         })
         .catch((error) => console.log(error));
     },
     toggle(index) {
       this.products.data[index].active = !this.products.data[index].active;
     },
+    search(){
+        console.log(this.selectedDate);
+    }
   },
 };
 </script>

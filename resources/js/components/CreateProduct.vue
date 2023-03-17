@@ -24,7 +24,8 @@
                         <h6 class="m-0 font-weight-bold text-primary">Media</h6>
                     </div>
                     <div class="card-body border">
-                        <vue-dropzone ref="myVueDropzone" id="dropzone" :options="dropzoneOptions"></vue-dropzone>
+                        <vue-dropzone ref="imageDropzone" id="image-dropzone" :options="dropzoneOptions"></vue-dropzone>
+                        <!-- <dropzone ref="imageDropzone" id="image-dropzone"></dropzone> -->
                     </div>
                 </div>
             </div>
@@ -49,10 +50,10 @@
                             </div>
                             <div class="col-md-8">
                                 <div class="form-group">
-                                    <label v-if="product_variant.length != 1" @click="product_variant.splice(index,1); checkVariant"
+                                    <label v-if="product_variant.length != 1" @click="product_variant.splice(index,1), checkVariant"
                                            class="float-right text-primary"
                                            style="cursor: pointer;">Remove</label>
-                                    <label v-else for="">.</label>
+                                    <label v-else for="">Name</label>
                                     <input-tag v-model="item.tags" @input="checkVariant" class="form-control"></input-tag>
                                 </div>
                             </div>
@@ -104,7 +105,8 @@ import InputTag from 'vue-input-tag'
 export default {
     components: {
         vueDropzone: vue2Dropzone,
-        InputTag
+        InputTag,
+        // Dropzone
     },
     props: {
         variants: {
@@ -117,7 +119,7 @@ export default {
             product_name: '',
             product_sku: '',
             description: '',
-            images: [],
+            images: {},
             product_variant: [
                 {
                     option: this.variants[0].id,
@@ -126,15 +128,21 @@ export default {
             ],
             product_variant_prices: [],
             dropzoneOptions: {
-                url: 'https://httpbin.org/post',
+                url: '/product',
                 thumbnailWidth: 150,
-                maxFilesize: 0.5,
-                headers: {"My-Awesome-Header": "header value"}
+                maxFilesize: 2,
+                acceptedFiles: 'image/*',
+                autoProcessQueue: false,
+                addRemoveLinks: true,
+                dictDefaultMessage: 'Drop files here or click to upload',
+                headers: {
+                'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content
+                }
             }
         }
     },
     methods: {
-        // it will push a new object into product variant
+         // it will push a new object into product variant
         newVariant() {
             let all_variants = this.variants.map(el => el.id)
             let selected_variants = this.product_variant.map(el => el.option);
@@ -183,25 +191,42 @@ export default {
                 title: this.product_name,
                 sku: this.product_sku,
                 description: this.description,
-                product_image: this.images,
                 product_variant: this.product_variant,
                 product_variant_prices: this.product_variant_prices
             }
 
-
+            //console.log(product);
+           
             axios.post('/product', product).then(response => {
+               this.saveImage(response.data)
+               //console.log(response.data);
+            }).catch(error => {
+                console.log(error);
+            })
+        },
+        saveImage(id){
+            const formData = new FormData()
+            const files = this.$refs.imageDropzone.getAcceptedFiles()
+            //console.log(files[0].images);
+
+            // Append each selected file to the FormData
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i]
+                formData.append('images[]', file)
+            }
+
+            formData.append('id',id);
+            axios.post('/product_image', formData).then(response => {
                 console.log(response.data);
             }).catch(error => {
                 console.log(error);
             })
-
-            console.log(product);
         }
 
 
     },
     mounted() {
-        console.log('Component mounted.')
+        
     }
 }
 </script>

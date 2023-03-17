@@ -1,0 +1,14 @@
+#name{
+    width: 12%;
+}
+
+#des{
+    width: 38%;
+}
+.reduce{
+    height: 60px;
+    overflow: hidden;
+}
+.table td{
+    color: white;
+}

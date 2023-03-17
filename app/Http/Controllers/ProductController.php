@@ -3,34 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\ProductImage;
 use App\Models\ProductVariant;
 use App\Models\ProductVariantPrice;
 use App\Models\Variant;
 use Illuminate\Http\Request;
 
-class ProductController extends Controller
-{
+class ProductController extends Controller {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Http\Response|\Illuminate\View\View
      */
-    public function index()
-    {
-        $products = Product::get();
-        // dd($products);
-        return view('products.index', [
-            'products' => $products
-        ]);
+    public function index() {
+        return view('products.index');
     }
 
+    public function test() {
+        $products = Product::with(['product_variants', 'product_variants_price'])->paginate(2);   
+        return response()->json($products);
+    }
     /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Http\Response|\Illuminate\View\View
      */
-    public function create()
-    {
+    public function create() {
         $variants = Variant::all();
         return view('products.create', compact('variants'));
     }
@@ -41,11 +39,71 @@ class ProductController extends Controller
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
+        $prod = Product::create([
+            'title'       => $request->title,
+            'sku'         => $request->sku,
+            'description' => $request->description,
+        ]);
+        //product_variant
+        $variants = $request->product_variant;
+        foreach ($variants as $variant) {
+            if(sizeof($variant['tags'])>1){
+                for($i = 0; $i<sizeof($variant['tags']); $i++){
+                    $variant_new = ProductVariant::create([
+                        'variant'    => $variant['tags'][$i],
+                        'variant_id' => $variant['option'],
+                        'product_id' => $prod->id,
+                    ]);
+                }           
+             }else{
+                $variant_new = ProductVariant::create([
+                    'variant'    => $variant['tags'][0],
+                    'variant_id' => $variant['option'],
+                    'product_id' => $prod->id,
+                ]);
+             }
+        }
 
+        $variant_prices = $request->product_variant_prices;
+        foreach ($variant_prices as $variant_price) {
+            $remove_forward_slash     = rtrim($variant_price['title'], '/');
+            $convert_variant_to_array = explode('/', $remove_forward_slash);
+            $variant_id_one           = ProductVariant::where('variant', $convert_variant_to_array[0])->where('product_id', $prod->id)->get();
+            $variant_id_two           = ProductVariant::where('variant', $convert_variant_to_array[1])->where('product_id', $prod->id)->get();
+            ProductVariantPrice::create([
+                'product_variant_one' => $variant_id_one[0]->id,
+                'product_variant_two' => $variant_id_two[0]->id,
+                'price'               => $variant_price['price'],
+                'stock'               => $variant_price['stock'],
+                'product_id'          => $prod->id,
+            ]);
+        }
+        //check whether exit in the table
+        //if exit grab the variant_id and use it in product_variant_price insertion
+        //if not exit create new variant and grad the variant_id and use it in product_variant_price insertion
+
+        //product_variant_price
+        //just insert it
+
+        //return $prod->id;
+        // $news = rtrim($variant_prices[0]['title'],'/');
+        return $prod->id;
     }
 
+    public function image(Request $req) {
+        $files = $req->file('images');
+        $id    = $req->input('id');
+        foreach ($files as $file) {
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('uploads/images'), $fileName);
+            $image             = new ProductImage();
+            $image->product_id = $id;
+            $image->file_path  = asset('uploads/images/' . $fileName);
+            $image->save();
+        }
+        return 'images';
+    }
 
     /**
      * Display the specified resource.
@@ -53,8 +111,7 @@ class ProductController extends Controller
      * @param \App\Models\Product $product
      * @return \Illuminate\Http\Response
      */
-    public function show($product)
-    {
+    public function show($product) {
 
     }
 
@@ -64,8 +121,7 @@ class ProductController extends Controller
      * @param \App\Models\Product $product
      * @return \Illuminate\Http\Response
      */
-    public function edit(Product $product)
-    {
+    public function edit(Product $product) {
         $variants = Variant::all();
         return view('products.edit', compact('variants'));
     }
@@ -77,8 +133,7 @@ class ProductController extends Controller
      * @param \App\Models\Product $product
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Product $product)
-    {
+    public function update(Request $request, Product $product) {
         //
     }
 
@@ -88,8 +143,7 @@ class ProductController extends Controller
      * @param \App\Models\Product $product
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
-    {
+    public function destroy(Product $product) {
         //
     }
 }

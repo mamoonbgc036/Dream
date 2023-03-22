@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('product-variant', 'VariantController');
     Route::resource('product', 'ProductController');
     Route::get('/all', 'ProductController@test');
+    Route::get('/custom/{parames}', 'ProductController@show');
     Route::post('/product_image', 'ProductController@image');
     Route::resource('blog', 'BlogController');
     Route::resource('blog-category', 'BlogCategoryController');

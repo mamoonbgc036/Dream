@@ -183,7 +183,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       selectedProduct: "",
       priceFrom: "",
       priceTo: "",
-      selectedDate: ""
+      selectedDate: "",
+      variants: []
     };
   },
   filters: {
@@ -204,7 +205,8 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     fetchAllProducts: function fetchAllProducts() {
       var _this = this;
       var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-      axios.get("/all?page=".concat(page)).then(function (response) {
+      axios.get("/all?page=".concat(page, "&name=").concat(this.selectedProduct, "&price_from=").concat(this.priceFrom, "&price_to=").concat(this.priceTo, "&variant=").concat(this.selectedVariant, "&created_at=").concat(this.selectedDate)).then(function (response) {
+        console.log(response.data);
         var test = response.data.data.map(function (element) {
           return _objectSpread(_objectSpread({}, element), {}, {
             active: false
@@ -224,9 +226,6 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     },
     toggle: function toggle(index) {
       this.products.data[index].active = !this.products.data[index].active;
-    },
-    search: function search() {
-      console.log(this.selectedDate);
     }
   }
 });
@@ -682,7 +681,7 @@ var render = function render() {
     on: {
       click: function click($event) {
         $event.preventDefault();
-        return _vm.search.apply(null, arguments);
+        return _vm.fetchAllProducts.apply(null, arguments);
       }
     }
   }, [_c("i", {

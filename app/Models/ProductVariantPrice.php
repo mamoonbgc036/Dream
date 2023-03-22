@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductVariantPrice extends Model
@@ -11,6 +12,6 @@ class ProductVariantPrice extends Model
         'product_variant_one', 'product_variant_two', 'product_variant_three','price','stock','product_id'
     ];
     public function product(){
-        return $this->belongsTo(Product::class,'id','product_id');
+        return $this->belongsTo(Product::class);
     }
 }

@@ -12,7 +12,7 @@ class Product extends Model
         'title', 'sku', 'description'
     ];
     public function product_variants_price(){
-        return $this->hasMany(ProductVariantPrice::class,'product_id','id');
+        return $this->hasMany(ProductVariantPrice::class);
     }
     public function images(){
         return $this->hasMany(ProductImage::class,'product_id','id');

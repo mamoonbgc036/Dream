@@ -25,7 +25,7 @@
                 <input type="date" name="date" v-model="selectedDate" placeholder="Date" class="form-control">
             </div>
             <div class="col-md-1">
-                <button type="submit" class="btn btn-primary float-right" @click.prevent="search"><i class="fa fa-search"></i></button>
+                <button type="submit" class="btn btn-primary float-right" @click.prevent="fetchAllProducts"><i class="fa fa-search"></i></button>
             </div>
         </div>
     </form>
@@ -103,6 +103,7 @@ export default {
       priceFrom:"",
       priceTo:"",
       selectedDate:"",
+      variants:[],  
     };
   },
   filters: {
@@ -118,8 +119,9 @@ export default {
   methods: {
     fetchAllProducts(page=1) {
       axios
-        .get(`/all?page=${page}`)
+        .get(`/all?page=${page}&name=${this.selectedProduct}&price_from=${this.priceFrom}&price_to=${this.priceTo}&variant=${this.selectedVariant}&created_at=${this.selectedDate}`,)
         .then((response) => {
+            console.log(response.data);
             const test =  response.data.data.map(element=>{
                return {...element, active:false}
             })
@@ -138,9 +140,7 @@ export default {
     toggle(index) {
       this.products.data[index].active = !this.products.data[index].active;
     },
-    search(){
-        console.log(this.selectedDate);
-    }
   },
 };
 </script>
+

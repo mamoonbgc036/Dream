@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
-use App\Models\Variant;
 use App\Models\ProductImage;
-use Illuminate\Http\Request;
 use App\Models\ProductVariant;
-use Illuminate\Support\Carbon;
 use App\Models\ProductVariantPrice;
+use App\Models\Variant;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class ProductController extends Controller {
     /**
@@ -21,9 +21,6 @@ class ProductController extends Controller {
     }
 
     public function test(Request $request) {
-        // $products = Product::with(['product_variants', 'product_variants_price'])->paginate(3);
-        // return response()->json($products);
-        //return $request->input('name');
         $query = Product::with(['product_variants', 'product_variants_price']);
 
         // Filter by product name
@@ -33,15 +30,15 @@ class ProductController extends Controller {
 
         // Filter by price variant
         if ($request->input('price_from') && $request->input('price_to')) {
-            $query->whereHas('product_variants_price', function($q) use ($request) {
+            $query->whereHas('product_variants_price', function ($q) use ($request) {
                 $q->where('price', '>=', $request->price_from)
-                  ->where('price', '<=', $request->price_to);
+                    ->where('price', '<=', $request->price_to);
             });
         }
 
-          // filter by variant product name
+        // filter by variant product name
         if ($request->input('variant')) {
-            $query->whereHas('product_variants', function($q) use ($request) {
+            $query->whereHas('product_variants', function ($q) use ($request) {
                 $q->where('variant', 'like', '%' . $request->input('variant') . '%');
             });
         }
@@ -52,35 +49,6 @@ class ProductController extends Controller {
             $query->where('created_at', '>=', $date->startOfDay());
         }
 
-        $products = $query->paginate(3);
-        return response()->json($products);
-    }
-
-    public function filter(Request $request) {
-        // $products = Product::with(['product_variants', 'product_variants_price'])->paginate(3);
-        // return response()->json($products);
-        //return $request->input('name');
-        //$query = Product::with(['product_variants_price']);
-        $query = ProductVariantPrice::with(['product']);
-
-        // // Filter by product name
-        if ($request->input('price_from')) {
-            $query->where('price', '=', $request->price_from);;
-        }
-
-        // Filter by price variant
-        if ($request->input('name')) {
-            $query->whereHas('product', function($q) use ($request) {
-                $q->where('title', '=', $request->input('name'));
-                //   ->where('price', '<=', $request->price_to);
-            });
-        }
-        // // Filter by created-at date
-        // if ($request->input('created_at')) {
-        //     $date = Carbon::createFromFormat('Y-m-d', $request->input('created_at'));
-        //     $query->where('created_at', '>=', $date->startOfDay());
-        // }
-        // return $query->get()[0]->product_variant_one;
         $products = $query->paginate(3);
         return response()->json($products);
     }
@@ -130,14 +98,17 @@ class ProductController extends Controller {
         foreach ($variant_prices as $variant_price) {
             $remove_forward_slash     = rtrim($variant_price['title'], '/');
             $convert_variant_to_array = explode('/', $remove_forward_slash);
-            $variant_id_one           = ProductVariant::where('variant', $convert_variant_to_array[0])->where('product_id', $prod->id)->get();
-            $variant_id_two           = ProductVariant::where('variant', $convert_variant_to_array[1])->where('product_id', $prod->id)->get();
+            $variant_id_one           = isset($convert_variant_to_array[0]) ? ProductVariant::where('variant', $convert_variant_to_array[0])->where('product_id', $prod->id)->get()[0]->id : null;
+            $variant_id_two           = isset($convert_variant_to_array[1]) ? ProductVariant::where('variant', $convert_variant_to_array[1])->where('product_id', $prod->id)->get()[0]->id : null;
+            $variant_id_three           = isset($convert_variant_to_array[2]) ? ProductVariant::where('variant', $convert_variant_to_array[2])->where('product_id', $prod->id)->get()[0]->id : null;
+            // return $variant_id_three.$variant_id_one.$variant_id_two;
             ProductVariantPrice::create([
-                'product_variant_one' => $variant_id_one[0]->id,
-                'product_variant_two' => $variant_id_two[0]->id,
-                'price'               => $variant_price['price'],
-                'stock'               => $variant_price['stock'],
-                'product_id'          => $prod->id,
+                'product_variant_one'   => $variant_id_one,
+                'product_variant_two'   => $variant_id_two,
+                'product_variant_three' => $variant_id_three,
+                'price'                 => $variant_price['price'],
+                'stock'                 => $variant_price['stock'],
+                'product_id'            => $prod->id,
             ]);
         }
         return $prod->id;
@@ -164,7 +135,7 @@ class ProductController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function show($product) {
-    
+
     }
 
     /**

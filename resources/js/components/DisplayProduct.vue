@@ -33,6 +33,10 @@
     <div class="card-body">
         <div class="table-response">
             <table class="table">
+                <loading :active.sync="isLoading"
+                 :can-cancel="true"
+                 :on-cancel="onCancel"
+                 :is-full-page="fullPage"></loading>
                 <thead>
                     <tr>
                         <th>#</th>
@@ -46,14 +50,14 @@
                 <tbody>
 
                     <tr v-for="(product,index) in products.data" :key="product.id">
-                        <td>{{ product.id }}</td>
+                        <td>{{ index+1 }}</td>
                         <td id="name">{{ product.title }}<br> Created at : {{product.created_at | formatDate }}</td>
                         <td id="des">{{ product.description }}</td>
                         <td>
                           <div :class="product.active ? 'reduce':''" >
                             <dl v-for="(varies, index) in product.product_variants_price" :key="varies.id" class="row mb-0" style="height: 80px; overflow: hidden" id="variant">
                             <dt class="col-sm-3 pb-0">
-                                <p> {{ product.product_variants.find(dat => dat.id === varies.product_variant_one).variant}}/{{ product.product_variants.find(dat => dat.id === varies.product_variant_two).variant}}</p>
+                                <p> {{ product.product_variants.find(dat => dat.id === varies.product_variant_one).variant}}/{{ product.product_variants.find(dat => dat.id === varies.product_variant_two).variant}}{{ varies.product_variant_three ? '/'+product.product_variants.find(dat => dat.id === varies.product_variant_three).variant : '' }}</p>
                             </dt>
                             <dd class="col-sm-9">
                                 <dl class="row mb-0">
@@ -93,6 +97,10 @@
 </div>
 </template>
 <script>
+    // Import component
+    import Loading from 'vue-loading-overlay';
+    // Import stylesheet
+    import 'vue-loading-overlay/dist/vue-loading.css';
 import '../../css/custom.css';
 export default {
   data() {
@@ -103,9 +111,14 @@ export default {
       priceFrom:"",
       priceTo:"",
       selectedDate:"",
+      isLoading:false,
+      fullPage: true,
       variants:[],  
     };
   },
+  components: {
+            Loading
+        },
   filters: {
     formatDate(value) {
       const date = new Date(value)
@@ -118,6 +131,7 @@ export default {
   },
   methods: {
     fetchAllProducts(page=1) {
+        this.isLoading= true;
       axios
         .get(`/all?page=${page}&name=${this.selectedProduct}&price_from=${this.priceFrom}&price_to=${this.priceTo}&variant=${this.selectedVariant}&created_at=${this.selectedDate}`,)
         .then((response) => {
@@ -128,6 +142,7 @@ export default {
 
             response.data.data = test;
             this.products = response.data;
+            this.isLoading=false;
             const myVar = response.data.data.map(element=>{
                  return element.product_variants.map(items=>{
                     return items.variant

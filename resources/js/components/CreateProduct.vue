@@ -2,6 +2,13 @@
     <section>
         <div class="row">
             <div class="col-md-6">
+                <loading :active.sync="isLoading"
+                 :can-cancel="true"
+                 :on-cancel="onCancel"
+                 :is-full-page="fullPage"></loading>
+                 <!-- <div class="bg-warning" v-for="error in errors">
+                    {{ error }}
+                 </div> -->
                 <div class="card shadow mb-4">
                     <div class="card-body">
                         <div class="form-group">
@@ -94,6 +101,9 @@
 
         <button @click="saveProduct" type="submit" class="btn btn-lg btn-primary">Save</button>
         <button type="button" class="btn btn-secondary btn-lg">Cancel</button>
+        <div class="alert alert-success my-2" v-if="isSuccess">
+            Insert Successfully
+        </div>
     </section>
 </template>
 
@@ -102,10 +112,15 @@ import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.min.css'
 import InputTag from 'vue-input-tag'
 
+import Loading from 'vue-loading-overlay';
+    // Import stylesheet
+import 'vue-loading-overlay/dist/vue-loading.css';
+
 export default {
     components: {
         vueDropzone: vue2Dropzone,
         InputTag,
+        Loading
         // Dropzone
     },
     props: {
@@ -119,7 +134,10 @@ export default {
             product_name: '',
             product_sku: '',
             description: '',
+            isLoading: false,
+            isSuccess: false,
             images: {},
+            // errors: {},
             product_variant: [
                 {
                     option: this.variants[0].id,
@@ -186,7 +204,8 @@ export default {
         },
 
         // store product into database
-        saveProduct() {
+        async saveProduct() {
+            this.isLoading = true;
             let product = {
                 title: this.product_name,
                 sku: this.product_sku,
@@ -197,11 +216,11 @@ export default {
 
             //console.log(product);
            
-            axios.post('/product', product).then(response => {
-               this.saveImage(response.data)
-               //console.log(response.data);
+            await axios.post('/product', product).then(response => {
+                // console.log(response.data);
+                this.saveImage(response.data)
             }).catch(error => {
-                console.log(error);
+                this.errors = error.response.data.errors
             })
         },
         saveImage(id){
@@ -217,9 +236,11 @@ export default {
 
             formData.append('id',id);
             axios.post('/product_image', formData).then(response => {
+                this.isLoading= false;
+                this.isSuccess = true;
                 console.log(response.data);
             }).catch(error => {
-                console.log(error);
+                this.errors = error.response.data.errors
             })
         }
 

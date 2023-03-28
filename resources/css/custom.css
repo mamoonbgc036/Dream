@@ -12,3 +12,10 @@
 .table td{
     color: white;
 }
+.cs{
+    color:red;
+     background-color:green;
+      width:100px;
+       height:100px;
+       text-align: center;
+}

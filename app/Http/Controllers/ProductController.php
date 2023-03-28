@@ -20,6 +20,11 @@ class ProductController extends Controller {
         return view('products.index');
     }
 
+    public function variants(){
+        $variants = ProductVariant::all();
+        return response()->json($variants);
+    }
+
     public function test(Request $request) {
         $query = Product::with(['product_variants', 'product_variants_price']);
 
@@ -50,7 +55,8 @@ class ProductController extends Controller {
         }
 
         $products = $query->paginate(3);
-        return response()->json($products);
+        return $products;
+        // return response()->json($products);
     }
     /**
      * Show the form for creating a new resource.
@@ -69,6 +75,12 @@ class ProductController extends Controller {
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request) {
+        $productValidation = $request->validate([
+            'title'       => 'required',
+            'sku'         => 'required',
+            'description' => 'required',
+            'product_variant_prices' => 'required'
+        ]);
         $prod = Product::create([
             'title'       => $request->title,
             'sku'         => $request->sku,
@@ -111,7 +123,7 @@ class ProductController extends Controller {
                 'product_id'            => $prod->id,
             ]);
         }
-        return $prod->id;
+        return $variant_new->product_id;
     }
 
     public function image(Request $req) {
@@ -135,7 +147,7 @@ class ProductController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function show($product) {
-
+    
     }
 
     /**
@@ -145,8 +157,9 @@ class ProductController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function edit(Product $product) {
+        $product = Product::with(['product_variants','images', 'product_variants_price'])->where('id', $product->id)->get();
         $variants = Variant::all();
-        return view('products.edit', compact('variants'));
+        return view('products.edit', compact('variants','product'));
     }
 
     /**

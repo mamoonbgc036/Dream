@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class ProductSeeder extends Seeder
 {
@@ -11,6 +12,11 @@ class ProductSeeder extends Seeder
      */
     public function run()
     {
-        //
+        DB::table('products')->insert([
+            'id'=>'01',
+            'title'=>'t-shirt',
+            'sku'=>'xl',
+            'description'=>'gorgeous and comfortable'
+        ]);
     }
 }

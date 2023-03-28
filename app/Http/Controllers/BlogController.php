@@ -15,6 +15,11 @@ class BlogController extends Controller
     public function index()
     {
         return view('blogs.index');
+        
+    }
+
+    public function rnfn(){
+        return rand(1,6);
     }
 
     /**
@@ -24,7 +29,7 @@ class BlogController extends Controller
      */
     public function create()
     {
-        return view('blogs.create');
+        return view('blogs.category.create');
     }
 
     /**

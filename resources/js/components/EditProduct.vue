@@ -133,23 +133,22 @@ export default {
         variants: {
             type: Array,
             required: true
-        }
+        },
+        product: {
+            type: Object,
+            required: true,
+        },
     },
     data() {
         return {
-            product_name: '',
+            product_name: this.product[0].title,
             product_sku: '',
             description: '',
             isLoading: false,
             isSuccess: false,
             images: {},
             errors: {},
-            product_variant: [
-                {
-                    option: this.variants[0].id,
-                    tags: []
-                }
-            ],
+            product_variant: [],
             product_variant_prices: [],
             dropzoneOptions: {
                 url: '/product',
@@ -218,9 +217,9 @@ export default {
                 description: this.description,
                 product_variant: this.product_variant,
                 product_variant_prices: this.product_variant_prices
-            };
+            }
 
-            console.log(product);
+            //console.log(product);
            
             await axios.post('/product', product).then(response => {
                 //console.log(response.data);
@@ -252,10 +251,40 @@ export default {
                 this.errors = error.response.data.errors
             })
         }
-
-
     },
     mounted() {
+        const mockFile = { name: 'image.jpg', size: 12345, type: 'image/jpeg' };
+        for (let index = 0; index < this.product[0].images.length; index++) {
+            const imageUrl = this.product[0].images[index].file_path;
+            // Use the addFile method to add the image to the Dropzone area
+            this.$refs.imageDropzone.manuallyAddFile(mockFile, imageUrl);          
+        };
+        const result = Object.values(this.product[0].product_variants.reduce((acc, curr) => {
+            if (acc[curr.variant_id]) {
+                acc[curr.variant_id].variant.push(curr.variant)
+            } else {
+                acc[curr.variant_id] = {
+                variant: [curr.variant],
+                variant_id: curr.variant_id,
+                product_id: curr.product_id,
+                }
+            }
+            return acc
+        }, {}));
+        // console.log(this.product[0].product_variants);
+        // console.log(this.product[0].product_variants_price);
+        for (let index = 0; index < result.length; index++) {
+            this.product_variant.push({
+                option: result[index].variant_id,
+                tags: result[index].variant
+            })
+        }
+        //this is for data under PREVIEW option of edit page
+        this.product[0].product_variants_price.map(items=>{
+            let varOne = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_one);
+            let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
+            console.log(varOne.variant);
+        });
     }
 }
 </script>

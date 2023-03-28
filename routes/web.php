@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Routing;
+use App\Http\Middleware;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,8 +28,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('product-variant', 'VariantController');
     Route::resource('product', 'ProductController');
     Route::get('/all', 'ProductController@test');
-    Route::get('/custom/{parames}', 'ProductController@show');
+    Route::get('/variants', 'ProductController@variants');
     Route::post('/product_image', 'ProductController@image');
-    Route::resource('blog', 'BlogController');
+    Route::resource('/blog', 'BlogController');
     Route::resource('blog-category', 'BlogCategoryController');
 });

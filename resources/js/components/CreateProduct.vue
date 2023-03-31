@@ -14,17 +14,17 @@
                         <div class="form-group">
                             <label for="">Product Name</label>
                             <input type="text" v-model="product_name" placeholder="Product Name" class="form-control">
-                            <p class="text-danger">{{ errors.title ? errors.title[0] : '' }}</p>
+                            <!-- <p class="text-danger">{{ errors.title ? errors.title[0] : '' }}</p> -->
                         </div>
                         <div class="form-group">
                             <label for="">Product SKU</label>
                             <input type="text" v-model="product_sku" placeholder="Product Name" class="form-control">
-                            <p class="text-danger">{{ errors.sku ? errors.sku[0] : '' }}</p>
+                            <!-- <p class="text-danger">{{ errors.sku ? errors.sku[0] : '' }}</p> -->
                         </div>
                         <div class="form-group">
                             <label for="">Description</label>
                             <textarea v-model="description" id="" cols="30" rows="4" class="form-control"></textarea>
-                            <p class="text-danger">{{ errors.description ? errors.description[0] : '' }}</p>
+                            <!-- <p class="text-danger">{{ errors.description ? errors.description[0] : '' }}</p> -->
                         </div>
                     </div>
                 </div>
@@ -84,7 +84,7 @@
                                     <td>Stock</td>
                                 </tr>
                                 <tr>
-                                    <p class="text-danger">{{ errors.product_variant_prices ? errors.product_variant_prices[0] : '' }}</p>
+                                    <!-- <p class="text-danger">{{ errors.product_variant_prices ? errors.product_variant_prices[0] : '' }}</p> -->
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -218,12 +218,8 @@ export default {
                 description: this.description,
                 product_variant: this.product_variant,
                 product_variant_prices: this.product_variant_prices
-            };
-
-            console.log(product);
-           
+            };         
             await axios.post('/product', product).then(response => {
-                //console.log(response.data);
                 this.saveImage(response.data)
             }).catch(error => {
                 this.isLoading = false;

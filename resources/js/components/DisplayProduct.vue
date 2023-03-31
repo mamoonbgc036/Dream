@@ -57,8 +57,8 @@
                           <div :class="product.active ? 'reduce':''" >
                             <dl v-for="(varies, index) in product.product_variants_price" :key="varies.id" class="row mb-0" style="height: 80px; overflow: hidden" id="variant">
                             <dt class="col-sm-3 pb-0">
-                                <p>{{product.product_variants.find(dat => dat.id === varies.product_variant_one)}}</p>
-                                <!-- <p> {{ product.product_variants.find(dat => dat.id == varies.product_variant_one)}}/{{ product.product_variants.find(dat => dat.id == varies.product_variant_two)}}{{ varies.product_variant_three ? '/'+product.product_variants.find(dat => dat.id === varies.product_variant_three) : '' }}</p> -->
+                                <!-- <p>{{product.product_variants.find(dat => dat.id === varies.product_variant_one)}}</p> -->
+                                <p> {{ product.product_variants.find(dat => dat.id == varies.product_variant_one).variant}}/{{ product.product_variants.find(dat => dat.id == varies.product_variant_two).variant}}{{ varies.product_variant_three ? '/'+product.product_variants.find(dat => dat.id === varies.product_variant_three).variant : '' }}</p>
                             </dt>
                             <dd class="col-sm-9">
                                 <dl class="row mb-0">
@@ -133,7 +133,7 @@ export default {
   },
   methods: {
     fetchAllProducts(page=1) {
-        // this.isLoading= true;
+        this.isLoading= true;
       axios
         .get(`/all?page=${page}&name=${this.selectedProduct}&price_from=${this.priceFrom}&price_to=${this.priceTo}&variant=${this.selectedVariant}&created_at=${this.selectedDate}`,)
         .then((response) => {
@@ -144,7 +144,7 @@ export default {
             response.data.data = test;
             this.products = response.data;
             console.log(this.products);
-            // this.isLoading=false;
+            this.isLoading=false;
             const myVar = response.data.data.map(element=>{
                  return element.product_variants.map(items=>{
                     return items.variant

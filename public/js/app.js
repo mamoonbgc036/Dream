@@ -137,10 +137,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 product_variant: _this2.product_variant,
                 product_variant_prices: _this2.product_variant_prices
               };
-              console.log(product);
-              _context.next = 5;
+              _context.next = 4;
               return axios.post('/product', product).then(function (response) {
-                //console.log(response.data);
                 _this2.saveImage(response.data);
               })["catch"](function (error) {
                 _this2.isLoading = false;
@@ -148,7 +146,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 _this2.errors = error.response.data.errors;
                 console.log(_this2.errors);
               });
-            case 5:
+            case 4:
             case "end":
               return _context.stop();
           }
@@ -248,7 +246,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
     fetchAllProducts: function fetchAllProducts() {
       var _this = this;
       var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
-      // this.isLoading= true;
+      this.isLoading = true;
       axios.get("/all?page=".concat(page, "&name=").concat(this.selectedProduct, "&price_from=").concat(this.priceFrom, "&price_to=").concat(this.priceTo, "&variant=").concat(this.selectedVariant, "&created_at=").concat(this.selectedDate)).then(function (response) {
         var test = response.data.data.map(function (element) {
           return _objectSpread(_objectSpread({}, element), {}, {
@@ -258,7 +256,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         response.data.data = test;
         _this.products = response.data;
         console.log(_this.products);
-        // this.isLoading=false;
+        _this.isLoading = false;
         var myVar = response.data.data.map(function (element) {
           return element.product_variants.map(function (items) {
             return items.variant;
@@ -339,8 +337,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   data: function data() {
     return {
       product_name: this.product[0].title,
-      product_sku: '',
-      description: '',
+      product_sku: this.product[0].sku,
+      description: this.product[0].description,
       isLoading: false,
       isSuccess: false,
       images: {},
@@ -427,9 +425,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 product_variant_prices: _this2.product_variant_prices
               }; //console.log(product);
               _context.next = 4;
-              return axios.post('/product', product).then(function (response) {
-                //console.log(response.data);
-                _this2.saveImage(response.data);
+              return axios.put("/product/".concat(_this2.product[0].id), product).then(function (response) {
+                console.log(response.data);
+                //this.saveImage(response.data)
               })["catch"](function (error) {
                 _this2.isLoading = false;
                 //this.errors = error.response.data.errors;
@@ -458,14 +456,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       axios.post('/product_image', formData).then(function (response) {
         _this3.isLoading = false;
         _this3.isSuccess = true;
-        console.log(response.data);
       })["catch"](function (error) {
         _this3.errors = error.response.data.errors;
       });
     }
   },
   mounted: function mounted() {
-    var _this4 = this;
     var mockFile = {
       name: 'image.jpg',
       size: 12345,
@@ -480,33 +476,34 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     var result = Object.values(this.product[0].product_variants.reduce(function (acc, curr) {
       if (acc[curr.variant_id]) {
         acc[curr.variant_id].variant.push(curr.variant);
+        acc[curr.variant_id].id.push(curr.id);
       } else {
         acc[curr.variant_id] = {
           variant: [curr.variant],
           variant_id: curr.variant_id,
-          product_id: curr.product_id
+          product_id: curr.product_id,
+          id: [curr.id]
         };
       }
       return acc;
     }, {}));
-    // console.log(this.product[0].product_variants);
-    // console.log(this.product[0].product_variants_price);
-    for (var _index = 0; _index < result.length; _index++) {
-      this.product_variant.push({
-        option: result[_index].variant_id,
-        tags: result[_index].variant
-      });
+    if (result.length > 0) {
+      for (var _index = 0; _index < result.length; _index++) {
+        this.product_variant.push({
+          id: result[_index].id,
+          option: result[_index].variant_id,
+          tags: result[_index].variant
+        });
+      }
+      this.checkVariant();
     }
     //this is for data under PREVIEW option of edit page
-    this.product[0].product_variants_price.map(function (items) {
-      var varOne = _this4.product[0].product_variants.find(function (varies) {
-        return varies.id == items.product_variant_one;
-      });
-      var varTwo = _this4.product[0].product_variants.find(function (varies) {
-        return varies.id == items.product_variant_two;
-      });
-      console.log(varOne.variant);
-    });
+    // this.product[0].product_variants_price.map(items=>{
+    //     let varOne = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_one);
+    //     let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
+    //     //let varThree = items.product_variant_three ? this.product[0].product_variants.find(varies=>varies.id==items.product_variant_three) : null;
+    //     this.getCombn(varOne.variant);
+    // });
   }
 });
 
@@ -574,9 +571,7 @@ var render = function render() {
         _vm.product_name = $event.target.value;
       }
     }
-  }), _vm._v(" "), _c("p", {
-    staticClass: "text-danger"
-  }, [_vm._v(_vm._s(_vm.errors.title ? _vm.errors.title[0] : ""))])]), _vm._v(" "), _c("div", {
+  })]), _vm._v(" "), _c("div", {
     staticClass: "form-group"
   }, [_c("label", {
     attrs: {
@@ -603,9 +598,7 @@ var render = function render() {
         _vm.product_sku = $event.target.value;
       }
     }
-  }), _vm._v(" "), _c("p", {
-    staticClass: "text-danger"
-  }, [_vm._v(_vm._s(_vm.errors.sku ? _vm.errors.sku[0] : ""))])]), _vm._v(" "), _c("div", {
+  })]), _vm._v(" "), _c("div", {
     staticClass: "form-group"
   }, [_c("label", {
     attrs: {
@@ -633,9 +626,7 @@ var render = function render() {
         _vm.description = $event.target.value;
       }
     }
-  }), _vm._v(" "), _c("p", {
-    staticClass: "text-danger"
-  }, [_vm._v(_vm._s(_vm.errors.description ? _vm.errors.description[0] : ""))])])])]), _vm._v(" "), _c("div", {
+  })])])]), _vm._v(" "), _c("div", {
     staticClass: "card shadow mb-4"
   }, [_vm._m(0), _vm._v(" "), _c("div", {
     staticClass: "card-body border"
@@ -733,9 +724,7 @@ var render = function render() {
     staticClass: "table-responsive"
   }, [_c("table", {
     staticClass: "table"
-  }, [_c("thead", [_vm._m(2), _vm._v(" "), _c("tr", [_c("p", {
-    staticClass: "text-danger"
-  }, [_vm._v(_vm._s(_vm.errors.product_variant_prices ? _vm.errors.product_variant_prices[0] : ""))])])]), _vm._v(" "), _c("tbody", _vm._l(_vm.product_variant_prices, function (variant_price) {
+  }, [_vm._m(2), _vm._v(" "), _c("tbody", _vm._l(_vm.product_variant_prices, function (variant_price) {
     return _c("tr", [_c("td", [_vm._v(_vm._s(variant_price.title))]), _vm._v(" "), _c("td", [_c("input", {
       directives: [{
         name: "model",
@@ -813,7 +802,7 @@ var staticRenderFns = [function () {
 }, function () {
   var _vm = this,
     _c = _vm._self._c;
-  return _c("tr", [_c("td", [_vm._v("Variant")]), _vm._v(" "), _c("td", [_vm._v("Price")]), _vm._v(" "), _c("td", [_vm._v("Stock")])]);
+  return _c("thead", [_c("tr", [_c("td", [_vm._v("Variant")]), _vm._v(" "), _c("td", [_vm._v("Price")]), _vm._v(" "), _c("td", [_vm._v("Stock")])]), _vm._v(" "), _c("tr")]);
 }];
 render._withStripped = true;
 
@@ -1032,9 +1021,13 @@ var render = function render() {
         }
       }, [_c("dt", {
         staticClass: "col-sm-3 pb-0"
-      }, [_c("p", [_vm._v(_vm._s(product.product_variants.find(function (dat) {
-        return dat.id === varies.product_variant_one;
-      })))])]), _vm._v(" "), _c("dd", {
+      }, [_c("p", [_vm._v(" " + _vm._s(product.product_variants.find(function (dat) {
+        return dat.id == varies.product_variant_one;
+      }).variant) + "/" + _vm._s(product.product_variants.find(function (dat) {
+        return dat.id == varies.product_variant_two;
+      }).variant) + _vm._s(varies.product_variant_three ? "/" + product.product_variants.find(function (dat) {
+        return dat.id === varies.product_variant_three;
+      }).variant : ""))])]), _vm._v(" "), _c("dd", {
         staticClass: "col-sm-9"
       }, [_c("dl", {
         staticClass: "row mb-0"

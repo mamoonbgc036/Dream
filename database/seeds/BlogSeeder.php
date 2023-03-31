@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class BlogSeeder extends Seeder
 {
@@ -11,6 +12,13 @@ class BlogSeeder extends Seeder
      */
     public function run()
     {
-        //
+        
+            DB::table('blogs')->insert([
+                'id'=>'01',
+                'title'=>'blog1',
+                'blog_post'=>'blog1 starts here..',
+                'blog_category_id'=>22,
+                'tags'=>'Gadgets and techs'
+            ]);
     }
 }

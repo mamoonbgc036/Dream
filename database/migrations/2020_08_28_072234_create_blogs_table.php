@@ -17,7 +17,6 @@ class CreateBlogsTable extends Migration
             $table->id();
             $table->string('title');
             $table->longText('blog_post');
-            $table->foreignId('blog_category_id')->constrained();
             $table->string('tags')->nullable();
             $table->timestamps();
         });

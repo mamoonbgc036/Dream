@@ -142,8 +142,8 @@ export default {
     data() {
         return {
             product_name: this.product[0].title,
-            product_sku: '',
-            description: '',
+            product_sku: this.product[0].sku,
+            description: this.product[0].description,
             isLoading: false,
             isSuccess: false,
             images: {},
@@ -221,9 +221,9 @@ export default {
 
             //console.log(product);
            
-            await axios.post('/product', product).then(response => {
-                //console.log(response.data);
-                this.saveImage(response.data)
+            await axios.put(`/product/${this.product[0].id}`, product).then(response => {
+                console.log(response.data);
+                //this.saveImage(response.data)
             }).catch(error => {
                 this.isLoading = false;
                 //this.errors = error.response.data.errors;
@@ -246,7 +246,6 @@ export default {
             axios.post('/product_image', formData).then(response => {
                 this.isLoading= false;
                 this.isSuccess = true;
-                console.log(response.data);
             }).catch(error => {
                 this.errors = error.response.data.errors
             })
@@ -262,29 +261,34 @@ export default {
         const result = Object.values(this.product[0].product_variants.reduce((acc, curr) => {
             if (acc[curr.variant_id]) {
                 acc[curr.variant_id].variant.push(curr.variant)
+                acc[curr.variant_id].id.push(curr.id);
             } else {
                 acc[curr.variant_id] = {
                 variant: [curr.variant],
                 variant_id: curr.variant_id,
                 product_id: curr.product_id,
+                id: [curr.id], 
                 }
             }
             return acc
         }, {}));
-        // console.log(this.product[0].product_variants);
-        // console.log(this.product[0].product_variants_price);
-        for (let index = 0; index < result.length; index++) {
-            this.product_variant.push({
-                option: result[index].variant_id,
-                tags: result[index].variant
-            })
+        if(result.length > 0){
+            for (let index = 0; index < result.length; index++) {
+                this.product_variant.push({
+                    id: result[index].id,
+                    option: result[index].variant_id,
+                    tags: result[index].variant
+                })
+            }
+            this.checkVariant();
         }
-        //this is for data under PREVIEW option of edit page
-        this.product[0].product_variants_price.map(items=>{
-            let varOne = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_one);
-            let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
-            console.log(varOne.variant);
-        });
+             //this is for data under PREVIEW option of edit page
+        // this.product[0].product_variants_price.map(items=>{
+        //     let varOne = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_one);
+        //     let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
+        //     //let varThree = items.product_variant_three ? this.product[0].product_variants.find(varies=>varies.id==items.product_variant_three) : null;
+        //     this.getCombn(varOne.variant);
+        // });
     }
 }
 </script>

@@ -176,11 +176,11 @@ class ProductController extends Controller {
         //     'product_variant_prices' => 'required'
         // ]);
 
-        $product_update = Product::findOrFail($product->id);
-        $product_update->title = $request->title;
-        $product_update->sku = $request->sku;
-        $product_update->description = $request->description;
-        $product_update->save();
+        // $product_update = Product::findOrFail($product->id);
+        // $product_update->title = $request->title;
+        // $product_update->sku = $request->sku;
+        // $product_update->description = $request->description;
+        // $product_update->save();
 
         
 
@@ -224,27 +224,34 @@ class ProductController extends Controller {
         //     return 'db is greater';
         // }
 
-        foreach ($variants as $variant) {
-            if (sizeof($variant['tags']) > 1) {
-                for ($i = 0; $i < sizeof($variant['tags']); $i++) {
-                    $dbVar = ProductVariant::find($variant['id'][$i]);
-                    $dbVar->variant = $variant['tags'][$i];
-                    $dbVar->variant_id = $variant['option'];
-                    $dbVar->product_id = $product->id;
-                    $dbVar->save();
-                }
-            } else {
-                $dbVar = ProductVariant::find($variant['id'][0]);
-                $dbVar->variant = $variant['tags'][0];
-                $dbVar->variant_id = $variant['option'];
-                $dbVar->product_id = $product->id;
-                $dbVar->save();
-            }
+        // foreach ($variants as $variant) {
+        //     if (sizeof($variant['tags']) > 1) {
+        //         for ($i = 0; $i < sizeof($variant['tags']); $i++) {
+        //             $dbVar = ProductVariant::find($variant['id'][$i]);
+        //             $dbVar->variant = $variant['tags'][$i];
+        //             $dbVar->variant_id = $variant['option'];
+        //             $dbVar->product_id = $product->id;
+        //             $dbVar->save();
+        //         }
+        //     } else {
+        //         $dbVar = ProductVariant::find($variant['id'][0]);
+        //         $dbVar->variant = $variant['tags'][0];
+        //         $dbVar->variant_id = $variant['option'];
+        //         $dbVar->product_id = $product->id;
+        //         $dbVar->save();
+        //     }
+        // }
+
+        // return 'ok';
+
+        $variant_prices = $request->product_variant_prices;
+
+        for ($i=0; $i < sizeof($variant_prices[1]) ; $i++) { 
+            $productData = ProductVariantPrice::find($variant_prices[1][$i]);
+            $data = $variant_prices[0][$i];
+            return $data['title'];
         }
 
-        return 'ok';
-
-        // $variant_prices = $request->product_variant_prices;
         // foreach ($variant_prices as $variant_price) {
         //     $remove_forward_slash     = rtrim($variant_price['title'], '/');
         //     $convert_variant_to_array = explode('/', $remove_forward_slash);
@@ -261,7 +268,7 @@ class ProductController extends Controller {
         //         'product_id'            => $prod->id,
         //     ]);
         // }
-        // return $variant_new->product_id;
+        return $variant_prices;
     }
 
     /**

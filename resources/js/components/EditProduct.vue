@@ -144,6 +144,7 @@ export default {
             product_name: this.product[0].title,
             product_sku: this.product[0].sku,
             description: this.product[0].description,
+            prod_var_pric_id:[],
             isLoading: false,
             isSuccess: false,
             images: {},
@@ -216,7 +217,7 @@ export default {
                 sku: this.product_sku,
                 description: this.description,
                 product_variant: this.product_variant,
-                product_variant_prices: this.product_variant_prices
+                product_variant_prices: [this.product_variant_prices, this.prod_var_pric_id],
             }
 
             //console.log(product);
@@ -282,13 +283,10 @@ export default {
             }
             this.checkVariant();
         }
-             //this is for data under PREVIEW option of edit page
-        // this.product[0].product_variants_price.map(items=>{
-        //     let varOne = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_one);
-        //     let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
-        //     //let varThree = items.product_variant_three ? this.product[0].product_variants.find(varies=>varies.id==items.product_variant_three) : null;
-        //     this.getCombn(varOne.variant);
-        // });
+
+        this.product[0].product_variants_price.map(items=>{
+            this.prod_var_pric_id.push(items.id);
+        })
     }
 }
 </script>

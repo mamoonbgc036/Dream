@@ -339,6 +339,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       product_name: this.product[0].title,
       product_sku: this.product[0].sku,
       description: this.product[0].description,
+      prod_var_pric_id: [],
       isLoading: false,
       isSuccess: false,
       images: {},
@@ -422,7 +423,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 sku: _this2.product_sku,
                 description: _this2.description,
                 product_variant: _this2.product_variant,
-                product_variant_prices: _this2.product_variant_prices
+                product_variant_prices: [_this2.product_variant_prices, _this2.prod_var_pric_id]
               }; //console.log(product);
               _context.next = 4;
               return axios.put("/product/".concat(_this2.product[0].id), product).then(function (response) {
@@ -462,6 +463,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     }
   },
   mounted: function mounted() {
+    var _this4 = this;
     var mockFile = {
       name: 'image.jpg',
       size: 12345,
@@ -497,13 +499,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }
       this.checkVariant();
     }
-    //this is for data under PREVIEW option of edit page
-    // this.product[0].product_variants_price.map(items=>{
-    //     let varOne = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_one);
-    //     let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
-    //     //let varThree = items.product_variant_three ? this.product[0].product_variants.find(varies=>varies.id==items.product_variant_three) : null;
-    //     this.getCombn(varOne.variant);
-    // });
+    this.product[0].product_variants_price.map(function (items) {
+      _this4.prod_var_pric_id.push(items.id);
+    });
   }
 });
 

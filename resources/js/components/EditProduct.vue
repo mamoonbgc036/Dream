@@ -235,6 +235,8 @@ export default {
         saveImage(id){
             const formData = new FormData()
             const files = this.$refs.imageDropzone.getAcceptedFiles()
+            //try this
+            const files = this.$refs.imageDropzone.getUploadingFiles()
             //console.log(files[0].images);
 
             // Append each selected file to the FormData

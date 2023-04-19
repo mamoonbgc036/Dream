@@ -230,8 +230,10 @@ export default {
         },
         saveImage(id){
             const formData = new FormData()
-            const files = this.$refs.imageDropzone.getAcceptedFiles()
-            //console.log(files[0].images);
+            // const files = this.$refs.imageDropzone.getAcceptedFiles()
+            let dropzone = this.$refs.imageDropzone.dropzone;
+            let files = dropzone.files;
+            console.log(files);
 
             // Append each selected file to the FormData
             for (let i = 0; i < files.length; i++) {
@@ -241,6 +243,7 @@ export default {
 
             formData.append('id',id);
             axios.post('/product_image', formData).then(response => {
+                console.log(response.data+'test');
                 this.isLoading= false;
                 this.isSuccess = true;
                 console.log(response.data);

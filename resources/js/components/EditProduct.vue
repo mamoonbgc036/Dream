@@ -34,7 +34,7 @@
                         <h6 class="m-0 font-weight-bold text-primary">Media</h6>
                     </div>
                     <div class="card-body border">
-                        <vue-dropzone ref="imageDropzone" id="image-dropzone" :options="dropzoneOptions"></vue-dropzone>
+                        <vue-dropzone ref="imageDropzone" @vdropzone-file-added-manually="onFileAddedManually" id="image-dropzone" :options="dropzoneOptions"></vue-dropzone>
                         <!-- <dropzone ref="imageDropzone" id="image-dropzone"></dropzone> -->
                     </div>
                 </div>
@@ -114,6 +114,7 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import vue2Dropzone from 'vue2-dropzone'
 import 'vue2-dropzone/dist/vue2Dropzone.min.css'
 import InputTag from 'vue-input-tag'
@@ -161,11 +162,12 @@ export default {
                 dictDefaultMessage: 'Drop files here or click to upload',
                 headers: {
                 'X-CSRF-TOKEN': document.head.querySelector('meta[name="csrf-token"]').content
-                }
+                },
             }
         }
     },
     methods: {
+
          // it will push a new object into product variant
         newVariant() {
             let all_variants = this.variants.map(el => el.id)
@@ -186,6 +188,7 @@ export default {
             this.product_variant.filter((item) => {
                 tags.push(item.tags);
             })
+            
 
             this.getCombn(tags).forEach(item => {
                 this.product_variant_prices.push({
@@ -210,21 +213,23 @@ export default {
         },
 
         // store product into database
-        async saveProduct() {
-            this.isLoading = true;
+         saveProduct() {
+            this.isLoading = true
             let product = {
                 title: this.product_name,
                 sku: this.product_sku,
                 description: this.description,
                 product_variant: this.product_variant,
-                product_variant_prices: [this.product_variant_prices, this.prod_var_pric_id],
+                product_variant_prices: this.product_variant_prices,
             }
 
+
             //console.log(product);
+             //this.saveImage(this.product[0].id)
            
-            await axios.put(`/product/${this.product[0].id}`, product).then(response => {
+             axios.put(`/product/${this.product[0].id}`, product).then(response => {
                 console.log(response.data);
-                //this.saveImage(response.data)
+               this.saveImage(this.product[0].id)
             }).catch(error => {
                 this.isLoading = false;
                 //this.errors = error.response.data.errors;
@@ -234,30 +239,22 @@ export default {
         },
         saveImage(id){
             const formData = new FormData()
-            const files = this.$refs.imageDropzone.getAcceptedFiles()
-            //console.log(files[0].images);
-
-            // Append each selected file to the FormData
-            for (let i = 0; i < files.length; i++) {
-                const file = files[i]
-                formData.append('images[]', file)
-            }
-
-            formData.append('id',id);
-            axios.post('/product_image', formData).then(response => {
+            let files = this.$refs.imageDropzone.dropzone.files;
+            let all_files ={'images' : files };
+            axios.post(`/product_image/${id}`, all_files).then(response => {
                 this.isLoading= false;
-                this.isSuccess = true;
+                console.log(response.data);
             }).catch(error => {
                 this.errors = error.response.data.errors
             })
         }
     },
     mounted() {
-        const mockFile = { name: 'image.jpg', size: 12345, type: 'image/jpeg' };
         for (let index = 0; index < this.product[0].images.length; index++) {
             const imageUrl = this.product[0].images[index].file_path;
+            const mockFile = { name: 'image.jpg', size: 12345, type: 'image/jpeg', dataURL:imageUrl };
             // Use the addFile method to add the image to the Dropzone area
-            this.$refs.imageDropzone.manuallyAddFile(mockFile, imageUrl);          
+            this.$refs.imageDropzone.manuallyAddFile(mockFile,imageUrl);         
         };
         const result = Object.values(this.product[0].product_variants.reduce((acc, curr) => {
             if (acc[curr.variant_id]) {
@@ -283,10 +280,26 @@ export default {
             }
             this.checkVariant();
         }
-
+        
+        // this.product[0].product_variants_price.map(items=>{
+        //     this.prod_var_pric_id.push(items.id);
+        // })
+        
+        // this.product[0].product_variants_price.map(items=>{
+        //     this.product_variant_prices.push(items.id);
+        // })
+        // this.product[0].product_variants_price.map(items=>{
+        //     let varOne = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_one);
+        //     let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
+        //     console.log(varOne.variant);
+        // });
         this.product[0].product_variants_price.map(items=>{
-            this.prod_var_pric_id.push(items.id);
-        })
+            let varOne = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_one);
+            let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
+            // let stock = this.product[0].product_variants.find(varies=>varies.id==items.stock);
+            //let varThree = items.product_variant_three ? this.product[0].product_variants.find(varies=>varies.id==items.product_variant_three) : null;
+            console.log(items.stock);
+        });
     }
 }
 </script>

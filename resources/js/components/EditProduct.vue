@@ -279,7 +279,7 @@ export default {
             let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
             let varThree = items.product_variant_three ? this.product[0].product_variants.find(varies=>varies.id==items.product_variant_three).variant : null;
             this.product_variant_prices.push({
-                title: varOne.variant+'/'+varTwo.variant+'/'+(varThree==null ? '' : varThree),
+                title: varOne.variant+'/'+varTwo.variant+'/'+(varThree==null ? '' : varThree+'/'),
                 price: items.price,
                 stock: items.stock
             });

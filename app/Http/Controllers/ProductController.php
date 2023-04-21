@@ -26,8 +26,8 @@ class ProductController extends Controller {
     }
 
     public function test(Request $request) {
-        $query = Product::with(['product_variants', 'product_variants_price']);
-
+        // $query = ProductVariantPrice::with(['product','variant'])->get();
+       $query = Product::with(['product_variants', 'product_variants_price']);
         // Filter by product name
         if ($request->input('name')) {
             $query->where('title', 'like', '%' . $request->input('name') . '%');

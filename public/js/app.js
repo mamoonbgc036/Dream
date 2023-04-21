@@ -251,6 +251,7 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
       this.isLoading = true;
       axios.get("/all?page=".concat(page, "&name=").concat(this.selectedProduct, "&price_from=").concat(this.priceFrom, "&price_to=").concat(this.priceTo, "&variant=").concat(this.selectedVariant, "&created_at=").concat(this.selectedDate)).then(function (response) {
+        console.log(response.data);
         var test = response.data.data.map(function (element) {
           return _objectSpread(_objectSpread({}, element), {}, {
             active: false
@@ -490,7 +491,7 @@ __webpack_require__.r(__webpack_exports__);
         return varies.id == items.product_variant_three;
       }).variant : null;
       _this3.product_variant_prices.push({
-        title: varOne.variant + '/' + varTwo.variant + '/' + (varThree == null ? '' : varThree),
+        title: varOne.variant + '/' + varTwo.variant + '/' + (varThree == null ? '' : varThree + '/'),
         price: items.price,
         stock: items.stock
       });

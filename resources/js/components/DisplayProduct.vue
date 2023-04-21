@@ -137,6 +137,7 @@ export default {
       axios
         .get(`/all?page=${page}&name=${this.selectedProduct}&price_from=${this.priceFrom}&price_to=${this.priceTo}&variant=${this.selectedVariant}&created_at=${this.selectedDate}`,)
         .then((response) => {
+            console.log(response.data);
             const test =  response.data.data.map(element=>{
                return {...element, active:false}
             })

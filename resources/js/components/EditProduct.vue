@@ -184,19 +184,37 @@ export default {
         // check the variant and render all the combination
         checkVariant() {
             let tags = [];
-            this.product_variant_prices = [];
+            //this.product_variant_prices = [];
             this.product_variant.filter((item) => {
                 tags.push(item.tags);
             })
-            
 
-            this.getCombn(tags).forEach(item => {
-                this.product_variant_prices.push({
-                    title: item,
-                    price: 0,
-                    stock: 0
-                })
+            let present_combination = []
+
+            this.product_variant_prices.map((combinations)=>{
+                present_combination.push(combinations.title)
             })
+            // this.getCombn(tags).forEach(item => {
+            //     if(present_combination.includes(item)){
+            //         alert(item);
+            //             this.product_variant_prices.push({
+            //             title: item,
+            //             price: 0,
+            //             stock: 0
+            //     })
+            //    }            
+            // })
+            let combined = this.getCombn(tags);
+            for (let i = 0; i < combined.length; i++) {
+                // alert(present_combination.indexOf(combined[i]))
+                if(!present_combination.includes(combined[i])){
+                    this.product_variant_prices.push({
+                        title: combined[i],
+                        price: 0,
+                        stock: 0
+                    })
+                }
+            }
         },
 
         // combination algorithm
@@ -256,6 +274,16 @@ export default {
             // Use the addFile method to add the image to the Dropzone area
             this.$refs.imageDropzone.manuallyAddFile(mockFile,imageUrl);         
         };
+        this.product[0].product_variants_price.map(items=>{
+            let varOne = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_one);
+            let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
+            let varThree = items.product_variant_three ? this.product[0].product_variants.find(varies=>varies.id==items.product_variant_three).variant : null;
+            this.product_variant_prices.push({
+                title: varOne.variant+'/'+varTwo.variant+'/'+(varThree==null ? '' : varThree),
+                price: items.price,
+                stock: items.stock
+            });
+        });
         const result = Object.values(this.product[0].product_variants.reduce((acc, curr) => {
             if (acc[curr.variant_id]) {
                 acc[curr.variant_id].variant.push(curr.variant)
@@ -293,13 +321,7 @@ export default {
         //     let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
         //     console.log(varOne.variant);
         // });
-        this.product[0].product_variants_price.map(items=>{
-            let varOne = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_one);
-            let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
-            // let stock = this.product[0].product_variants.find(varies=>varies.id==items.stock);
-            //let varThree = items.product_variant_three ? this.product[0].product_variants.find(varies=>varies.id==items.product_variant_three) : null;
-            console.log(items.stock);
-        });
+   
     }
 }
 </script>

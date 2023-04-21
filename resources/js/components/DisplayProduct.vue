@@ -143,7 +143,6 @@ export default {
 
             response.data.data = test;
             this.products = response.data;
-            console.log(this.products);
             this.isLoading=false;
             const myVar = response.data.data.map(element=>{
                  return element.product_variants.map(items=>{

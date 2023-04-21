@@ -258,7 +258,6 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
         });
         response.data.data = test;
         _this.products = response.data;
-        console.log(_this.products);
         _this.isLoading = false;
         var myVar = response.data.data.map(function (element) {
           return element.product_variants.map(function (items) {
@@ -383,19 +382,36 @@ __webpack_require__.r(__webpack_exports__);
     },
     // check the variant and render all the combination
     checkVariant: function checkVariant() {
-      var _this = this;
       var tags = [];
-      this.product_variant_prices = [];
+      //this.product_variant_prices = [];
       this.product_variant.filter(function (item) {
         tags.push(item.tags);
       });
-      this.getCombn(tags).forEach(function (item) {
-        _this.product_variant_prices.push({
-          title: item,
-          price: 0,
-          stock: 0
-        });
+      var present_combination = [];
+      this.product_variant_prices.map(function (combinations) {
+        present_combination.push(combinations.title);
       });
+      // this.getCombn(tags).forEach(item => {
+      //     if(present_combination.includes(item)){
+      //         alert(item);
+      //             this.product_variant_prices.push({
+      //             title: item,
+      //             price: 0,
+      //             stock: 0
+      //     })
+      //    }            
+      // })
+      var combined = this.getCombn(tags);
+      for (var i = 0; i < combined.length; i++) {
+        // alert(present_combination.indexOf(combined[i]))
+        if (!present_combination.includes(combined[i])) {
+          this.product_variant_prices.push({
+            title: combined[i],
+            price: 0,
+            stock: 0
+          });
+        }
+      }
     },
     // combination algorithm
     getCombn: function getCombn(arr, pre) {
@@ -411,7 +427,7 @@ __webpack_require__.r(__webpack_exports__);
     },
     // store product into database
     saveProduct: function saveProduct() {
-      var _this2 = this;
+      var _this = this;
       this.isLoading = true;
       var product = {
         title: this.product_name,
@@ -426,31 +442,31 @@ __webpack_require__.r(__webpack_exports__);
 
       axios.put("/product/".concat(this.product[0].id), product).then(function (response) {
         console.log(response.data);
-        _this2.saveImage(_this2.product[0].id);
+        _this.saveImage(_this.product[0].id);
       })["catch"](function (error) {
-        _this2.isLoading = false;
+        _this.isLoading = false;
         //this.errors = error.response.data.errors;
-        _this2.errors = error.response.data.errors;
-        console.log(_this2.errors);
+        _this.errors = error.response.data.errors;
+        console.log(_this.errors);
       });
     },
     saveImage: function saveImage(id) {
-      var _this3 = this;
+      var _this2 = this;
       var formData = new FormData();
       var files = this.$refs.imageDropzone.dropzone.files;
       var all_files = {
         'images': files
       };
       axios.post("/product_image/".concat(id), all_files).then(function (response) {
-        _this3.isLoading = false;
+        _this2.isLoading = false;
         console.log(response.data);
       })["catch"](function (error) {
-        _this3.errors = error.response.data.errors;
+        _this2.errors = error.response.data.errors;
       });
     }
   },
   mounted: function mounted() {
-    var _this4 = this;
+    var _this3 = this;
     for (var index = 0; index < this.product[0].images.length; index++) {
       var imageUrl = this.product[0].images[index].file_path;
       var mockFile = {
@@ -463,6 +479,22 @@ __webpack_require__.r(__webpack_exports__);
       this.$refs.imageDropzone.manuallyAddFile(mockFile, imageUrl);
     }
     ;
+    this.product[0].product_variants_price.map(function (items) {
+      var varOne = _this3.product[0].product_variants.find(function (varies) {
+        return varies.id == items.product_variant_one;
+      });
+      var varTwo = _this3.product[0].product_variants.find(function (varies) {
+        return varies.id == items.product_variant_two;
+      });
+      var varThree = items.product_variant_three ? _this3.product[0].product_variants.find(function (varies) {
+        return varies.id == items.product_variant_three;
+      }).variant : null;
+      _this3.product_variant_prices.push({
+        title: varOne.variant + '/' + varTwo.variant + '/' + (varThree == null ? '' : varThree),
+        price: items.price,
+        stock: items.stock
+      });
+    });
     var result = Object.values(this.product[0].product_variants.reduce(function (acc, curr) {
       if (acc[curr.variant_id]) {
         acc[curr.variant_id].variant.push(curr.variant);
@@ -500,17 +532,6 @@ __webpack_require__.r(__webpack_exports__);
     //     let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
     //     console.log(varOne.variant);
     // });
-    this.product[0].product_variants_price.map(function (items) {
-      var varOne = _this4.product[0].product_variants.find(function (varies) {
-        return varies.id == items.product_variant_one;
-      });
-      var varTwo = _this4.product[0].product_variants.find(function (varies) {
-        return varies.id == items.product_variant_two;
-      });
-      // let stock = this.product[0].product_variants.find(varies=>varies.id==items.stock);
-      //let varThree = items.product_variant_three ? this.product[0].product_variants.find(varies=>varies.id==items.product_variant_three) : null;
-      console.log(items.stock);
-    });
   }
 });
 

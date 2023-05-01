@@ -54,11 +54,12 @@
                         <td id="name">{{ product.title }}<br> Created at : {{product.created_at | formatDate }}</td>
                         <td id="des">{{ product.description }}</td>
                         <td>
-                          <div :class="product.active ? 'reduce':''" >
+                          <div :class="product.active ? '':'reduce'" >
                             <dl v-for="(varies, index) in product.product_variants_price" :key="varies.id" class="row mb-0" style="height: 80px; overflow: hidden" id="variant">
                             <dt class="col-sm-3 pb-0">
-                                <!-- <p>{{product.product_variants.find(dat => dat.id === varies.product_variant_one)}}</p> -->
+                                <!-- <p>{{varies.product_variant_three ? '/'+productVariants.find(dat => dat.id === varies.product_variant_three).variant : ''}}</p> -->
                                 <p> {{ product.product_variants.find(dat => dat.id == varies.product_variant_one).variant}}/{{ product.product_variants.find(dat => dat.id == varies.product_variant_two).variant}}{{ varies.product_variant_three ? '/'+product.product_variants.find(dat => dat.id === varies.product_variant_three).variant : '' }}</p>
+                                <!-- <p> {{ productVariants.find(dat => dat.id == varies.product_variant_one).variant}}/{{ productVariants.find(dat => dat.id == varies.product_variant_two).variant}}{{ varies.product_variant_three ? '/'+productVariants.find(dat => dat.id === varies.product_variant_three).variant : '' }}</p> -->
                             </dt>
                             <dd class="col-sm-9">
                                 <dl class="row mb-0">
@@ -136,36 +137,26 @@ export default {
         this.isLoading= true;
       axios
         .get(`/all?page=${page}&name=${this.selectedProduct}&price_from=${this.priceFrom}&price_to=${this.priceTo}&variant=${this.selectedVariant}&created_at=${this.selectedDate}`,)
-        .then((response) => {
-            console.log(response.data);
+        .then((response) => {           
             const test =  response.data.data.map(element=>{
                return {...element, active:false}
             })
-
+          
             response.data.data = test;
             this.products = response.data;
             this.isLoading=false;
             const myVar = response.data.data.map(element=>{
-                 return element.product_variants.map(items=>{
+                 return element.product_variants.map(items=>{                   
                     return items.variant
                  })
             });
+
             this.variants = [...new Set(myVar.flat())];
+            console.log(this.variants);
             // this.getVariants();
         })
         .catch((error) => console.log(error));
     },
-    // getVariants(){
-    //     axios.get('/variants')
-    //     .then(response=>{
-    //         const varArry = response.data.map(ele=>{
-    //             return ele.variant
-    //         });
-    //         this.variants =  [...new Set(varArry)];
-    //     }).catch((errors)=>{
-    //         console.log(errors);
-    //     })
-    // },
     toggle(index) {
       this.products.data[index].active = !this.products.data[index].active;
     },

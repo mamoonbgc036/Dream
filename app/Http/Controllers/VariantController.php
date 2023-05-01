@@ -37,6 +37,10 @@ class VariantController extends Controller
      */
     public function store(VariantRequest $request)
     {
+        // Variant::create([
+        //     'title'=>$request->title,
+        //     'description'=>$request->description
+        // ]);
         $variant = new Variant();
         $variant->fill($request->all());
         $variant->save();
@@ -86,8 +90,10 @@ class VariantController extends Controller
      * @param \App\Models\Variant $variant
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Variant $variant)
+    public function destroy(Variant $variant, $id)
     {
-        //
+        $variant = Variant::findOrFail($id);
+        $variant->delete();
+        return back();
     }
 }

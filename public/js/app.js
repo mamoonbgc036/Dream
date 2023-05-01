@@ -86,8 +86,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           return entry1 == entry2;
         });
       });
-      // console.log(available_variants)
-
       this.product_variant.push({
         option: available_variants[0],
         tags: []
@@ -139,6 +137,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
               };
               _context.next = 4;
               return axios.post('/product', product).then(function (response) {
+                console.log(response.data);
                 _this2.saveImage(response.data);
               })["catch"](function (error) {
                 _this2.isLoading = false;
@@ -251,7 +250,6 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
       var page = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 1;
       this.isLoading = true;
       axios.get("/all?page=".concat(page, "&name=").concat(this.selectedProduct, "&price_from=").concat(this.priceFrom, "&price_to=").concat(this.priceTo, "&variant=").concat(this.selectedVariant, "&created_at=").concat(this.selectedDate)).then(function (response) {
-        console.log(response.data);
         var test = response.data.data.map(function (element) {
           return _objectSpread(_objectSpread({}, element), {}, {
             active: false
@@ -266,22 +264,12 @@ function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input ==
           });
         });
         _this.variants = _toConsumableArray(new Set(myVar.flat()));
+        console.log(_this.variants);
         // this.getVariants();
       })["catch"](function (error) {
         return console.log(error);
       });
     },
-    // getVariants(){
-    //     axios.get('/variants')
-    //     .then(response=>{
-    //         const varArry = response.data.map(ele=>{
-    //             return ele.variant
-    //         });
-    //         this.variants =  [...new Set(varArry)];
-    //     }).catch((errors)=>{
-    //         console.log(errors);
-    //     })
-    // },
     toggle: function toggle(index) {
       this.products.data[index].active = !this.products.data[index].active;
     }
@@ -374,8 +362,6 @@ __webpack_require__.r(__webpack_exports__);
           return entry1 == entry2;
         });
       });
-      // console.log(available_variants)
-
       this.product_variant.push({
         option: available_variants[0],
         tags: []
@@ -384,7 +370,6 @@ __webpack_require__.r(__webpack_exports__);
     // check the variant and render all the combination
     checkVariant: function checkVariant() {
       var tags = [];
-      //this.product_variant_prices = [];
       this.product_variant.filter(function (item) {
         tags.push(item.tags);
       });
@@ -392,25 +377,26 @@ __webpack_require__.r(__webpack_exports__);
       this.product_variant_prices.map(function (combinations) {
         present_combination.push(combinations.title);
       });
-      // this.getCombn(tags).forEach(item => {
-      //     if(present_combination.includes(item)){
-      //         alert(item);
-      //             this.product_variant_prices.push({
-      //             title: item,
-      //             price: 0,
-      //             stock: 0
-      //     })
-      //    }            
-      // })
       var combined = this.getCombn(tags);
-      for (var i = 0; i < combined.length; i++) {
-        // alert(present_combination.indexOf(combined[i]))
-        if (!present_combination.includes(combined[i])) {
-          this.product_variant_prices.push({
-            title: combined[i],
-            price: 0,
-            stock: 0
-          });
+      //here if condition is required when user remove a variant or tag
+      if (present_combination.length < combined.length) {
+        for (var i = 0; i < combined.length; i++) {
+          //check user typed new tag combination exist in product_variant_price combination. if not exist,new combinaton append
+          if (!present_combination.includes(combined[i])) {
+            this.product_variant_prices.push({
+              title: combined[i],
+              price: 0,
+              stock: 0
+            });
+          }
+        }
+      } else {
+        for (var index = 0; index < this.product_variant_prices.length; index++) {
+          if (combined.indexOf(this.product_variant_prices[index].title) < 0) {
+            this.product_variant_prices.splice(index, 1);
+            //decreament in index is requred as splice reduce the length of product_variant_prices array
+            index--;
+          }
         }
       }
     },
@@ -427,7 +413,7 @@ __webpack_require__.r(__webpack_exports__);
       return ans;
     },
     // store product into database
-    saveProduct: function saveProduct() {
+    updateProduct: function updateProduct() {
       var _this = this;
       this.isLoading = true;
       var product = {
@@ -437,16 +423,11 @@ __webpack_require__.r(__webpack_exports__);
         product_variant: this.product_variant,
         product_variant_prices: this.product_variant_prices
       };
-
-      //console.log(product);
-      //this.saveImage(this.product[0].id)
-
       axios.put("/product/".concat(this.product[0].id), product).then(function (response) {
         console.log(response.data);
         _this.saveImage(_this.product[0].id);
       })["catch"](function (error) {
         _this.isLoading = false;
-        //this.errors = error.response.data.errors;
         _this.errors = error.response.data.errors;
         console.log(_this.errors);
       });
@@ -476,10 +457,11 @@ __webpack_require__.r(__webpack_exports__);
         type: 'image/jpeg',
         dataURL: imageUrl
       };
-      // Use the addFile method to add the image to the Dropzone area
+      // Used to show saved image in database to the Dropzone area
       this.$refs.imageDropzone.manuallyAddFile(mockFile, imageUrl);
     }
     ;
+    //add product_variant_price items saved in db under ui preview section
     this.product[0].product_variants_price.map(function (items) {
       var varOne = _this3.product[0].product_variants.find(function (varies) {
         return varies.id == items.product_variant_one;
@@ -520,19 +502,6 @@ __webpack_require__.r(__webpack_exports__);
       }
       this.checkVariant();
     }
-
-    // this.product[0].product_variants_price.map(items=>{
-    //     this.prod_var_pric_id.push(items.id);
-    // })
-
-    // this.product[0].product_variants_price.map(items=>{
-    //     this.product_variant_prices.push(items.id);
-    // })
-    // this.product[0].product_variants_price.map(items=>{
-    //     let varOne = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_one);
-    //     let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
-    //     console.log(varOne.variant);
-    // });
   }
 });
 
@@ -1036,7 +1005,7 @@ var render = function render() {
         id: "des"
       }
     }, [_vm._v(_vm._s(product.description))]), _vm._v(" "), _c("td", [_c("div", {
-      "class": product.active ? "reduce" : ""
+      "class": product.active ? "" : "reduce"
     }, _vm._l(product.product_variants_price, function (varies, index) {
       return _c("dl", {
         key: varies.id,
@@ -1393,7 +1362,7 @@ var render = function render() {
       type: "submit"
     },
     on: {
-      click: _vm.saveProduct
+      click: _vm.updateProduct
     }
   }, [_vm._v("Save")]), _vm._v(" "), _c("button", {
     staticClass: "btn btn-secondary btn-lg",

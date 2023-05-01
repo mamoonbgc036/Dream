@@ -173,6 +173,8 @@ class ProductController extends Controller {
         $product->description = $request->description;
         $product->save();
         $variants = $request->product_variant;
+
+        //return $variants;
         //in case of edit. if i only edit stock and price, last variant is deleted. and destroy display pages. check if ($reqVariantSize > $dbVarSize) {
         $reqVarArray    = [];
         $reqVariantSize = 0;
@@ -213,8 +215,9 @@ class ProductController extends Controller {
         }else if($reqVariantSize == $dbVarSize){
 
         }else {
+           
             for (; $varCounter < $dbVarSize; $varCounter++) {
-                if ($varCounter < $dbVarSize - 1) {
+                if ($varCounter < $reqVariantSize) {
                     $insertVar                          = explode('=>', $reqVarArray[$varCounter]);
                     $dbVariant[$varCounter]->variant    = $insertVar[1];
                     $dbVariant[$varCounter]->variant_id = $insertVar[0];

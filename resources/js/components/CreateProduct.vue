@@ -171,7 +171,6 @@ export default {
             let all_variants = this.variants.map(el => el.id)
             let selected_variants = this.product_variant.map(el => el.option);
             let available_variants = all_variants.filter(entry1 => !selected_variants.some(entry2 => entry1 == entry2))
-            // console.log(available_variants)
 
             this.product_variant.push({
                 option: available_variants[0],
@@ -186,7 +185,7 @@ export default {
             this.product_variant.filter((item) => {
                 tags.push(item.tags);
             })
-
+            
             this.getCombn(tags).forEach(item => {
                 this.product_variant_prices.push({
                     title: item,
@@ -220,6 +219,7 @@ export default {
                 product_variant_prices: this.product_variant_prices
             };         
             await axios.post('/product', product).then(response => {
+                console.log(response.data)
                 this.saveImage(response.data)
             }).catch(error => {
                 this.isLoading = false;

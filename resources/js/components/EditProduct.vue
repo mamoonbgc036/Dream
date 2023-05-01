@@ -105,7 +105,7 @@
             </div>
         </div>
 
-        <button @click="saveProduct" type="submit" class="btn btn-lg btn-primary">Save</button>
+        <button @click="updateProduct" type="submit" class="btn btn-lg btn-primary">Save</button>
         <button type="button" class="btn btn-secondary btn-lg">Cancel</button>
         <div class="alert alert-primary my-2" v-if="isSuccess">
             Insert Successfully
@@ -173,7 +173,6 @@ export default {
             let all_variants = this.variants.map(el => el.id)
             let selected_variants = this.product_variant.map(el => el.option);
             let available_variants = all_variants.filter(entry1 => !selected_variants.some(entry2 => entry1 == entry2))
-            // console.log(available_variants)
 
             this.product_variant.push({
                 option: available_variants[0],
@@ -183,36 +182,35 @@ export default {
 
         // check the variant and render all the combination
         checkVariant() {
-            let tags = [];
-            //this.product_variant_prices = [];
+            let tags = []
             this.product_variant.filter((item) => {
                 tags.push(item.tags);
             })
-
             let present_combination = []
 
             this.product_variant_prices.map((combinations)=>{
                 present_combination.push(combinations.title)
             })
-            // this.getCombn(tags).forEach(item => {
-            //     if(present_combination.includes(item)){
-            //         alert(item);
-            //             this.product_variant_prices.push({
-            //             title: item,
-            //             price: 0,
-            //             stock: 0
-            //     })
-            //    }            
-            // })
             let combined = this.getCombn(tags);
-            for (let i = 0; i < combined.length; i++) {
-                // alert(present_combination.indexOf(combined[i]))
-                if(!present_combination.includes(combined[i])){
-                    this.product_variant_prices.push({
-                        title: combined[i],
-                        price: 0,
-                        stock: 0
-                    })
+            //here if condition is required when user remove a variant or tag
+            if(present_combination.length < combined.length){
+                for (let i = 0; i < combined.length; i++) {
+                    //check user typed new tag combination exist in product_variant_price combination. if not exist,new combinaton append
+                    if(!present_combination.includes(combined[i])){
+                        this.product_variant_prices.push({
+                            title: combined[i],
+                            price: 0,
+                            stock: 0
+                        })
+                    }
+                }
+            }else{
+                for (let index = 0; index < this.product_variant_prices.length; index++) {
+                    if(combined.indexOf(this.product_variant_prices[index].title)<0){
+                        this.product_variant_prices.splice(index,1)
+                        //decreament in index is requred as splice reduce the length of product_variant_prices array
+                        index--
+                    }
                 }
             }
         },
@@ -231,7 +229,7 @@ export default {
         },
 
         // store product into database
-         saveProduct() {
+        updateProduct() {
             this.isLoading = true
             let product = {
                 title: this.product_name,
@@ -239,18 +237,12 @@ export default {
                 description: this.description,
                 product_variant: this.product_variant,
                 product_variant_prices: this.product_variant_prices,
-            }
-
-
-            //console.log(product);
-             //this.saveImage(this.product[0].id)
-           
+            }          
              axios.put(`/product/${this.product[0].id}`, product).then(response => {
                 console.log(response.data);
                this.saveImage(this.product[0].id)
             }).catch(error => {
                 this.isLoading = false;
-                //this.errors = error.response.data.errors;
                 this.errors = error.response.data.errors
                 console.log(this.errors);
             })
@@ -269,11 +261,13 @@ export default {
     },
     mounted() {
         for (let index = 0; index < this.product[0].images.length; index++) {
+            
             const imageUrl = this.product[0].images[index].file_path;
             const mockFile = { name: 'image.jpg', size: 12345, type: 'image/jpeg', dataURL:imageUrl };
-            // Use the addFile method to add the image to the Dropzone area
+            // Used to show saved image in database to the Dropzone area
             this.$refs.imageDropzone.manuallyAddFile(mockFile,imageUrl);         
         };
+        //add product_variant_price items saved in db under ui preview section
         this.product[0].product_variants_price.map(items=>{
             let varOne = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_one);
             let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
@@ -308,20 +302,6 @@ export default {
             }
             this.checkVariant();
         }
-        
-        // this.product[0].product_variants_price.map(items=>{
-        //     this.prod_var_pric_id.push(items.id);
-        // })
-        
-        // this.product[0].product_variants_price.map(items=>{
-        //     this.product_variant_prices.push(items.id);
-        // })
-        // this.product[0].product_variants_price.map(items=>{
-        //     let varOne = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_one);
-        //     let varTwo = this.product[0].product_variants.find(varies=>varies.id==items.product_variant_two);
-        //     console.log(varOne.variant);
-        // });
-   
     }
 }
 </script>
